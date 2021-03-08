@@ -97,7 +97,7 @@ class ResilientSession(Session):
                 )
             )
         if hasattr(response, "status_code"):
-            if response.status_code in [502, 503, 504, 401]:
+            if response.status_code in [502, 503, 504, 401, 429]:
                 # 401 UNAUTHORIZED still randomly returned by Atlassian Cloud as of 2017-01-16
                 msg = "%s %s" % (response.status_code, response.reason)
                 # 2019-07-25: Disabled recovery for codes above^
