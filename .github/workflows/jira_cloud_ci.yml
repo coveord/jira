@@ -13,6 +13,9 @@ on:
         required: true
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     environment: cloud
@@ -26,10 +29,15 @@ jobs:
         python-version: ["3.8"]
 
     steps:
-      - uses: actions/checkout@master
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@61b9e3751b92087fd0b06925ba6dd6314e06f089 # master
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -38,7 +46,7 @@ jobs:
         run: |
           echo "::set-output name=dir::$(pip cache dir)"
       - name: Setup the Pip cache
-        uses: actions/cache@v3
+        uses: actions/cache@2f8e54208210a422b2efd51efaa6bd6d7ca8920f # v3.4.3
         with:
           path: ${{ steps.pip-cache.outputs.dir }}
           key: >-
@@ -65,7 +73,7 @@ jobs:
           CI_JIRA_CLOUD_USER_TOKEN: ${{ secrets.CLOUD_USER_TOKEN }}
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3.1.0
+        uses: codecov/codecov-action@81cd2dc8148241f03f5839d295e000b8f761e378 # v3.1.0
         with:
           file: ./coverage.xml
           name: ${{ runner.os }}-${{ matrix.python-version }}-Cloud

@@ -4,6 +4,9 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+
 jobs:
   pypi:
     name: Publish to PyPI registry
@@ -17,8 +20,13 @@ jobs:
       TOX_PARALLEL_NO_SPINNER: 1
 
     steps:
+    - name: Harden the runner (Audit all outbound calls)
+      uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+      with:
+        egress-policy: audit
+
     - name: Switch to using Python 3.8 by default
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
       with:
         python-version: 3.8
 
@@ -26,7 +34,7 @@ jobs:
       run: python3 -m pip install --user tox
 
     - name: Check out src from Git
-      uses: actions/checkout@v2
+      uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
       with:
         fetch-depth: 0  # needed by setuptools-scm
 
@@ -36,7 +44,7 @@ jobs:
     - name: Publish to test.pypi.org
       if: >-  # "create" workflows run separately from "push" & "pull_request"
         github.event_name == 'release'
-      uses: pypa/gh-action-pypi-publish@master
+      uses: pypa/gh-action-pypi-publish@c1b34028248d0c9f7d90fe29fef2122e2276ff6f # master
       with:
         password: ${{ secrets.testpypi_password }}
         repository_url: https://test.pypi.org/legacy/
@@ -44,6 +52,6 @@ jobs:
     - name: Publish to pypi.org
       if: >-  # "create" workflows run separately from "push" & "pull_request"
         github.event_name == 'release'
-      uses: pypa/gh-action-pypi-publish@master
+      uses: pypa/gh-action-pypi-publish@c1b34028248d0c9f7d90fe29fef2122e2276ff6f # master
       with:
         password: ${{ secrets.pypi_password }}
